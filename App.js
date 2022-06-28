@@ -8,7 +8,7 @@ import Converter from './src/Converter';
 function App() {
   return (
     <View style={styles.container}>
-      <Converter mA="USD" mB="BRL" />
+      <Converter fromCcy="USD" toCcy="BRL" />
     </View>
   );
 }

@@ -1,5 +1,5 @@
 // External Libraries
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -9,23 +9,25 @@ import {
   Keyboard,
 } from 'react-native';
 
+// Services
 import api from '../services/api';
 
-// convert?q=USD_PHP,PHP_USD&compact=ultra&apiKey=ca15f95f374c652b5f93
-function Converter({mA, mB}) {
-  const [moedaA, setMoedaA] = useState(mA);
-  const [moedaB, setMoedaB] = useState(mB);
-  const [moedaBValor, setMoedaBValor] = useState(0);
+function Converter({fromCcy, toCcy}) {
+  // States
+  const [fromCurrency, setFromCurrency] = useState(fromCcy);
+  const [toCurrency, setToCurrency] = useState(toCcy);
+  const [amount, setAmount] = useState(0);
   const [convertedValue, setConvertedValue] = useState(0);
 
-  async function converter() {
-    let de_para = moedaA + '_' + moedaB;
+  // Functions
+  async function convert() {
+    let from_to = fromCurrency.toUpperCase() + '_' + toCurrency.toUpperCase();
     const response = await api.get(
-      `convert?q=${de_para}&compact=ultra&apiKey=ca15f95f374c652b5f93`,
+      `convert?q=${from_to}&compact=ultra&apiKey=ca15f95f374c652b5f93`,
     );
-    let cotacao = response.data[de_para];
 
-    let result = cotacao * parseFloat(moedaBValor);
+    let quote = response.data[from_to];
+    let result = quote * parseFloat(amount);
     setConvertedValue(result.toFixed(2));
 
     Keyboard.dismiss();
@@ -33,19 +35,33 @@ function Converter({mA, mB}) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {moedaA} para {moedaB}
-      </Text>
+      <View style={styles.currencyArea}>
+        <Text style={styles.title}>from</Text>
+
+        <TextInput
+          placeholder="USD"
+          style={styles.currencyInput}
+          onChangeText={text => setFromCurrency(text)}
+        />
+
+        <Text style={styles.title}>to</Text>
+
+        <TextInput
+          placeholder="BRL"
+          style={styles.currencyInput}
+          onChangeText={text => setToCurrency(text)}
+        />
+      </View>
 
       <TextInput
-        placeholder="Valor a ser convertido"
+        placeholder="Amount"
         style={styles.inputArea}
-        onChangeText={value => setMoedaBValor(value)}
+        onChangeText={value => setAmount(value)}
         keyboardType="numeric"
       />
 
-      <TouchableOpacity style={styles.buttonArea} onPress={() => converter()}>
-        <Text style={styles.buttonText}>Converter</Text>
+      <TouchableOpacity style={styles.buttonArea} onPress={() => convert()}>
+        <Text style={styles.buttonText}>Convert</Text>
       </TouchableOpacity>
 
       <Text style={styles.convertedValue}>
@@ -62,10 +78,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  currencyArea: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     color: 'black',
+  },
+  currencyInput: {
+    width: 85,
+    height: 40,
+    backgroundColor: '#ccc',
+    textAlign: 'center',
+    fontSize: 20,
+    color: 'black',
+    padding: 0,
+    borderRadius: 5,
+    marginLeft: 5,
+    marginRight: 5,
   },
   inputArea: {
     width: 280,
